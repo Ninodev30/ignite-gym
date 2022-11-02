@@ -7,11 +7,7 @@ import Input from '@components/Input';
 import Button from '@components/Button';
 
 const SignIn: React.FC = () => {
-    const navigation = useNavigation<AuthNavigatorRoutesProps>();
-
-    const handleCreateNewAccount = () => {
-        navigation.navigate('signUp');
-    }
+    const { navigate }: AuthNavigatorRoutesProps = useNavigation();
 
     return (
         <ScrollView
@@ -62,7 +58,7 @@ const SignIn: React.FC = () => {
                     <Button
                         title='Criar conta'
                         variant='outline'
-                        onPress={handleCreateNewAccount}
+                        onPress={() => navigate('signUp')}
                     />
                 </Center>
             </VStack>

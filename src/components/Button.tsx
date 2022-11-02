@@ -15,7 +15,6 @@ const Button: React.FC<Props> = ({ title, variant, ...rest }) => {
             borderWidth={variant === 'solid' ? 'none' : 1}
             borderColor='green.500'
             _pressed={{ bg: variant === 'solid' ? 'green.500' : 'gray.500' }}
-            mb={6}
             {...rest}
         >
             <Text

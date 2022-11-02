@@ -1,7 +1,7 @@
-import { Center, Heading, VStack, SectionList, Text, Flex } from "native-base";
+import { useState } from "react";
+import { Heading, VStack, SectionList, Text } from "native-base";
 import ScreenHeader from "@components/ScreenHeader";
 import HistoryCard from "@components/HistoryCard";
-import { useState } from "react";
 
 const History: React.FC = () => {
     const [listExercises, setListExercises] = useState([

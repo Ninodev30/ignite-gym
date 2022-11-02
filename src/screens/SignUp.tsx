@@ -6,11 +6,7 @@ import Input from '@components/Input';
 import Button from '@components/Button';
 
 const SignUp: React.FC = () => {
-    const navigation = useNavigation();
-
-    const handleGoBack = () => {
-        navigation.goBack();
-    }
+    const { goBack } = useNavigation();
 
     return (
         <ScrollView
@@ -25,7 +21,7 @@ const SignUp: React.FC = () => {
                     resizeMode='contain'
                     position='absolute'
                 />
-                <Center my={24}>
+                <Center mt={24} mb={20}>
                     <LogoSvg />
                     <Text color='gray.100' fontSize='sm'>
                         Treine sua mente e o seu corpo
@@ -59,8 +55,8 @@ const SignUp: React.FC = () => {
                 <Button
                     title='Voltar para o login'
                     variant='outline'
-                    mt={8}
-                    onPress={handleGoBack}
+                    mt={12}
+                    onPress={() => goBack()}
                 />
             </VStack>
         </ScrollView>

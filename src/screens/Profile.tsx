@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
-import { VStack, ScrollView, Center, Skeleton, Text, Heading, useToast } from "native-base";
+import { VStack, ScrollView, Center, Skeleton, Text, Heading, useToast, IToastProps } from "native-base";
 import * as EIP from 'expo-image-picker';
 import * as EFS from 'expo-file-system';
+import { useForm } from 'react-hook-form';
+import type { UseFormReturn, FieldValues } from 'react-hook-form';
 import ScreenHeader from "@components/ScreenHeader";
 import UserPhoto from "@components/UserPhoto";
 import Input from '@components/Input';
@@ -11,9 +13,10 @@ import Button from '@components/Button';
 const Profile: React.FC = () => {
     const [isPhotoLoading, setIsPhotoLoading] = useState<boolean>(false);
     const [userPhoto, setUserPhoto] = useState<string>('https://github.com/Ninodev30.png');
-    const PHOTO_SIZE: number = 33;
 
-    const { show } = useToast();
+    const showToast: (props: IToastProps) => any = useToast().show;
+    const { control }: UseFormReturn<FieldValues, any> = useForm();
+    const PHOTO_SIZE: number = 33;
 
     const handleUserPhotoSelect: () => Promise<void> = async () => {
         setIsPhotoLoading(true);
@@ -33,7 +36,7 @@ const Profile: React.FC = () => {
                 const photoInfo: EFS.FileInfo = await EFS.getInfoAsync(photoSelected.uri);
 
                 if (photoInfo.size && (photoInfo.size / 1024 / 1024) > 5)
-                    return show({
+                    return showToast({
                         title: 'Escolha uma imagem de até 5MB',
                         placement: 'top',
                         bgColor: 'red.700'
@@ -44,7 +47,7 @@ const Profile: React.FC = () => {
         }
 
         catch (error) {
-            show({
+            showToast({
                 title: 'Não foi possível alterar sua foto',
                 placement: 'top',
                 bgColor: 'gray.400'

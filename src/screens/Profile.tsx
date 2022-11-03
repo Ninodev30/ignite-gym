@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
-import { VStack, ScrollView, Center, Skeleton, Text, Heading } from "native-base";
+import { VStack, ScrollView, Center, Skeleton, Text, Heading, useToast } from "native-base";
+import * as EIP from 'expo-image-picker';
+import * as EFS from 'expo-file-system';
 import ScreenHeader from "@components/ScreenHeader";
 import UserPhoto from "@components/UserPhoto";
 import Input from '@components/Input';
@@ -8,7 +10,52 @@ import Button from '@components/Button';
 
 const Profile: React.FC = () => {
     const [isPhotoLoading, setIsPhotoLoading] = useState<boolean>(false);
+    const [userPhoto, setUserPhoto] = useState<string>('https://github.com/Ninodev30.png');
     const PHOTO_SIZE: number = 33;
+
+    const { show } = useToast();
+
+    const handleUserPhotoSelect: () => Promise<void> = async () => {
+        setIsPhotoLoading(true);
+
+        try {
+            const photoSelected: EIP.ImagePickerResult = await EIP.launchImageLibraryAsync({
+                mediaTypes: EIP.MediaTypeOptions.Images,
+                quality: 1,
+                aspect: [4, 4],    // Image 4 for 4
+                allowsEditing: true
+            });
+
+            if (photoSelected.cancelled)
+                return;
+
+            if (photoSelected.uri) {
+                const photoInfo: EFS.FileInfo = await EFS.getInfoAsync(photoSelected.uri);
+
+                if (photoInfo.size && (photoInfo.size / 1024 / 1024) > 5)
+                    return show({
+                        title: 'Escolha uma imagem de até 5MB',
+                        placement: 'top',
+                        bgColor: 'red.700'
+                    });
+
+                setUserPhoto(photoSelected.uri);
+            }
+        }
+
+        catch (error) {
+            show({
+                title: 'Não foi possível alterar sua foto',
+                placement: 'top',
+                bgColor: 'gray.400'
+            });
+            console.log(error);
+        }
+
+        finally {
+            setIsPhotoLoading(false);
+        }
+    }
 
     return (
         <VStack flex={1}>
@@ -26,13 +73,13 @@ const Profile: React.FC = () => {
                             />
                             :
                             <UserPhoto
-                                source={{ uri: 'https://github.com/Ninodev30.png' }}
+                                source={{ uri: userPhoto }}
                                 alt='User Photo'
                                 size={PHOTO_SIZE}
                             />
                     }
 
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleUserPhotoSelect}>
                         <Text
                             color='green.500'
                             fontSize='md'

@@ -35,6 +35,7 @@ const Exercise: React.FC = () => {
                     <Heading
                         color='gray.100'
                         fontSize='lg'
+                        fontFamily='heading'
                         flexShrink={1}
                     >
                         Puxada frontal

@@ -3,8 +3,6 @@ import { TouchableOpacity } from 'react-native';
 import { VStack, ScrollView, Center, Skeleton, Text, Heading, useToast, IToastProps } from "native-base";
 import * as EIP from 'expo-image-picker';
 import * as EFS from 'expo-file-system';
-import { useForm } from 'react-hook-form';
-import type { UseFormReturn, FieldValues } from 'react-hook-form';
 import ScreenHeader from "@components/ScreenHeader";
 import UserPhoto from "@components/UserPhoto";
 import Input from '@components/Input';
@@ -14,8 +12,7 @@ const Profile: React.FC = () => {
     const [isPhotoLoading, setIsPhotoLoading] = useState<boolean>(false);
     const [userPhoto, setUserPhoto] = useState<string>('https://github.com/Ninodev30.png');
 
-    const showToast: (props: IToastProps) => any = useToast().show;
-    const { control }: UseFormReturn<FieldValues, any> = useForm();
+    const show : (props: IToastProps) => any = useToast().show;
     const PHOTO_SIZE: number = 33;
 
     const handleUserPhotoSelect: () => Promise<void> = async () => {
@@ -36,7 +33,7 @@ const Profile: React.FC = () => {
                 const photoInfo: EFS.FileInfo = await EFS.getInfoAsync(photoSelected.uri);
 
                 if (photoInfo.size && (photoInfo.size / 1024 / 1024) > 5)
-                    return showToast({
+                    return show({
                         title: 'Escolha uma imagem de até 5MB',
                         placement: 'top',
                         bgColor: 'red.700'
@@ -47,7 +44,7 @@ const Profile: React.FC = () => {
         }
 
         catch (error) {
-            showToast({
+            show({
                 title: 'Não foi possível alterar sua foto',
                 placement: 'top',
                 bgColor: 'gray.400'
@@ -108,6 +105,7 @@ const Profile: React.FC = () => {
                     <Heading
                         color='gray.200'
                         fontSize='md'
+                        fontFamily='heading'
                         alignSelf='flex-start'
                         mt={9}
                         mb={4}

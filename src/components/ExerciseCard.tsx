@@ -30,6 +30,7 @@ const ExerciseCard: React.FC<Props> = ({ title, ...rest }) => {
                     <Heading
                         color='white'
                         fontSize='lg'
+                        fontFamily='heading'
                     >
                         {title}
                     </Heading>

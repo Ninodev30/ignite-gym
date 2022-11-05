@@ -14,6 +14,7 @@ const ScreenHeader: React.FC<Props> = ({ title }) => {
             <Heading
                 color='gray.100'
                 fontSize='xl'
+                fontFamily='heading'
             >
                 {title}
             </Heading>

@@ -29,7 +29,11 @@ const SignIn: React.FC = () => {
                     </Text>
                 </Center>
                 <Center mt={16}>
-                    <Heading color='gray.100' mb={6} fontFamily='heading'>
+                    <Heading
+                        color='gray.100'
+                        fontFamily='heading'
+                        mb={6}
+                    >
                         Acesse sua conta
                     </Heading>
                     <Input

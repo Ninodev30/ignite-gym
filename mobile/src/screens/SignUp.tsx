@@ -2,36 +2,14 @@ import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+import api from '@services/api';
+import signUpSchema from '@utils/signUpSchema';
+import FormDataProps from 'src/@types/formDataProps';
 import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png'
 import Input from '@components/Input';
 import Button from '@components/Button';
-
-type FormDataProps = {
-    name: string;
-    email: string;
-    password: string;
-    password_confirm: string;
-}
-
-const signUpSchema = yup.object({
-    name: yup
-        .string()
-        .required('Informe o nome.'),
-    email: yup
-        .string()
-        .required('Informe o seu e-mail.')
-        .email('E-mail inválido.'),
-    password: yup
-        .string()
-        .required('Informe a senha.')
-        .min(6, 'A senha deve ter no mínimo 6 dígitos.'),
-    password_confirm: yup
-        .string()
-        .required('Informe a confirmação de senha.')
-        .oneOf([yup.ref('password'), null], 'A confirmação de senha não confere.')
-})
+import { AxiosResponse } from 'axios';
 
 const SignUp: React.FC = () => {
     const { goBack } = useNavigation();
@@ -39,8 +17,14 @@ const SignUp: React.FC = () => {
         resolver: yupResolver(signUpSchema)
     });
 
-    const handleSignUp: (data: FormDataProps) => void = ({ name, email, password, password_confirm }) => {
-        console.log(name, email, password, password_confirm);
+    const handleSignUp: (data: FormDataProps) => Promise<void> = async ({ name, email, password }) => {
+        try {
+            const response: AxiosResponse = await api.post('/users', { name, email, password });
+            console.log(response.data)
+        }
+        catch (error) {
+
+        }
     }
 
     return (

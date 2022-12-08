@@ -1,18 +1,21 @@
-import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base';
+import { VStack, Image, Text, Center, Heading, ScrollView, useToast, IToastProps } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { AxiosResponse } from 'axios';
 import api from '@services/api';
+import AppError from '@utils/AppError';
 import signUpSchema from '@utils/signUpSchema';
 import FormDataProps from 'src/@types/formDataProps';
 import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png'
 import Input from '@components/Input';
 import Button from '@components/Button';
-import { AxiosResponse } from 'axios';
 
 const SignUp: React.FC = () => {
     const { goBack } = useNavigation();
+    const { show } = useToast();
+
     const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
         resolver: yupResolver(signUpSchema)
     });
@@ -20,10 +23,17 @@ const SignUp: React.FC = () => {
     const handleSignUp: (data: FormDataProps) => Promise<void> = async ({ name, email, password }) => {
         try {
             const response: AxiosResponse = await api.post('/users', { name, email, password });
-            console.log(response.data)
+
         }
         catch (error) {
+            const isAppError = error instanceof AppError;
+            const title: string = isAppError ? error.message : 'Não foi possível criar a conta. Tente novamente mais tarde.'
 
+            show({
+                title,
+                placement: 'top',
+                bgColor: 'red.500'
+            })
         }
     }
 

@@ -1,4 +1,4 @@
-import { VStack, Image, Text, Center, Heading, ScrollView, useToast, IToastProps } from 'native-base';
+import { VStack, Image, Text, Center, Heading, ScrollView, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';

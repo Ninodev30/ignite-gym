@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { useTheme } from 'native-base';
-import { createBottomTabNavigator, BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { BottomTabNavigationProp, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeSvg from '@assets/home.svg';
 import HistorySvg from '@assets/history.svg';
 import ProfileSvg from '@assets/profile.svg';

@@ -5,8 +5,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { AxiosResponse } from 'axios';
 import api from '@services/api';
 import AppError from '@utils/AppError';
-import signUpSchema from '@utils/signUpSchema';
-import FormDataProps from 'src/@types/formDataProps';
+import loginSchema from '@utils/loginSchema';
+import SignUpDataProps from 'src/@types/signUpDataProps';
 import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png'
 import Input from '@components/Input';
@@ -16,11 +16,11 @@ const SignUp: React.FC = () => {
     const { goBack } = useNavigation();
     const { show } = useToast();
 
-    const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
-        resolver: yupResolver(signUpSchema)
+    const { control, handleSubmit, formState: { errors } } = useForm<SignUpDataProps>({
+        resolver: yupResolver(loginSchema.signUp)
     });
 
-    const handleSignUp: (data: FormDataProps) => Promise<void> = async ({ name, email, password }) => {
+    const handleSignUp: (data: SignUpDataProps) => Promise<void> = async ({ name, email, password }) => {
         try {
             const response: AxiosResponse = await api.post('/users', { name, email, password });
 

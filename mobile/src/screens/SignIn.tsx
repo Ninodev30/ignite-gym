@@ -9,16 +9,24 @@ import LogoSvg from '@assets/logo.svg';
 import BackgroundImg from '@assets/background.png'
 import Input from '@components/Input';
 import Button from '@components/Button';
+import useAuth from '@hooks/useAuth';
 
 const SignIn: React.FC = () => {
+    const { user, methods: { signIn } } = useAuth();
     const { navigate }: AuthNavigatorRoutesProps = useNavigation();
 
     const { control, handleSubmit, formState: { errors } } = useForm<SignInDataProps>({
         resolver: yupResolver(loginSchema.signIn)
     })
 
-    const handleSignIn: () => void = () => {
-
+    const handleSignIn: (data: SignInDataProps) => Promise<void> = async ({ email, password }) => {
+        try {
+            await signIn({ email, password });
+            console.log(user);
+        }
+        catch (error) {
+            console.log(error);
+        }
     }
 
     return (
@@ -72,6 +80,8 @@ const SignIn: React.FC = () => {
                                 onChangeText={onChange}
                                 value={value}
                                 errorMessage={errors.password?.message}
+                                onSubmitEditing={handleSubmit(handleSignIn)}
+                                returnKeyType='send'
                             />
                         )}
                     />

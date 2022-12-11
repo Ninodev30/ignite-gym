@@ -8,7 +8,6 @@ const Routes: React.FC = () => {
     const { user } = useAuth();
     const { colors } = useTheme();
     
-    console.log('logged user', user)
     DefaultTheme.colors.background = colors.gray[700];
 
     return (

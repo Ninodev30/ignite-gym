@@ -1,39 +1,30 @@
 import { TouchableOpacity } from 'react-native'
 import { Heading, HStack, Icon, Text, VStack } from "native-base"
 import { MaterialIcons } from '@expo/vector-icons';
+import defaultUserPhoto from '@assets/userPhotoDefault.png';
+import useAuth from '@hooks/useAuth';
 import UserPhoto from "./UserPhoto";
 
 const HomeHeader: React.FC = () => {
+    const { user, methods: { signOut } } = useAuth();
+
     return (
-        <HStack
-            bgColor='gray.600'
-            pt={16}
-            pb={5}
-            px={8}
-            alignItems='center'
-        >
+        <HStack bgColor='gray.600' pt={16} pb={5} px={8} alignItems='center'>
             <UserPhoto
-                source={{ uri: 'https://github.com/ninodev30.png' }}
+                source={user.avatar ? { uri: 'https://github.com/ninodev30.png' } : defaultUserPhoto}
                 alt='user photo'
                 size={16}
                 mr={4}
             />
             <VStack flex={1}>
-                <Text
-                    color='gray.100'
-                    fontSize='md'
-                >
+                <Text color='gray.100' fontSize='md'>
                     Olá,
                 </Text>
-                <Heading
-                    color='gray.100'
-                    fontSize='md'
-                    fontFamily='heading'
-                >
-                    Enzo
+                <Heading color='gray.100' fontSize='md' fontFamily='heading'>
+                    {user.name}
                 </Heading>
             </VStack>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={signOut}>
                 <Icon
                     as={MaterialIcons}
                     name='logout'

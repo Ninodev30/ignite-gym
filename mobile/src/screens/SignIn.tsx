@@ -1,4 +1,4 @@
-import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base';
+import { VStack, Image, Text, Center, Heading, ScrollView, useToast } from 'native-base';
 import { useNavigation } from '@react-navigation/native'
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -10,8 +10,10 @@ import BackgroundImg from '@assets/background.png'
 import Input from '@components/Input';
 import Button from '@components/Button';
 import useAuth from '@hooks/useAuth';
+import AppError from '@utils/AppError';
 
 const SignIn: React.FC = () => {
+    const { show } = useToast();
     const { user, methods: { signIn } } = useAuth();
     const { navigate }: AuthNavigatorRoutesProps = useNavigation();
 
@@ -22,10 +24,16 @@ const SignIn: React.FC = () => {
     const handleSignIn: (data: SignInDataProps) => Promise<void> = async ({ email, password }) => {
         try {
             await signIn({ email, password });
-            console.log(user);
         }
         catch (error) {
-            console.log(error);
+            const isAppError = error instanceof AppError;
+            const title: string = isAppError ? error.message : 'Não foi possível entrar na conta. Tente novamente mais tarde.'
+
+            show({
+                title,
+                placement: 'top',
+                bgColor: 'red.500'
+            })
         }
     }
 

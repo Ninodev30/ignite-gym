@@ -3,6 +3,7 @@ import api from "@services/api";
 import UserDTO from "@dtos/UserDTO";
 import ContextMethodsTypeProps from "src/@types/contextMethods";
 import storageUser from "@storage/storageUser";
+import storageAuthToken from "@storage/token/storageAuth";
 
 export type AuthContextDataProps = {
     user: UserDTO;
@@ -25,12 +26,8 @@ const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) =
             try {
                 const { data } = await api.post('/sessions', { email, password });
 
-                if (data.user) {
-                    setUser(data.user);
-                    storageUser.save(data.user);
-                }
-
-                console.log(data)
+                if (data.user && data.token)
+                    methods.storageUserAndToken(data.user, data.token);
             }
             catch (error) {
                 throw error;
@@ -57,6 +54,23 @@ const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) =
 
                 if (userLogged)
                     setUser(userLogged);
+            }
+            catch (error) {
+                throw error;
+            }
+            finally {
+                setIsLoadingUserStorageData(false);
+            }
+        },
+        storageUserAndToken: async (userData, token) => {
+            try {
+                setIsLoadingUserStorageData(true);
+
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+                await storageUser.save(userData);
+                await storageAuthToken.save(token);
+                setUser(userData);
             }
             catch (error) {
                 throw error;

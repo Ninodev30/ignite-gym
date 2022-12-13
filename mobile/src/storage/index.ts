@@ -1,23 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserDTO from "@dtos/UserDTO";
-import { USER_STORAGE, AUTH_TOKEN_STORAGE } from "./storageConfig";
-
-type StorageType = {
-    user: {
-        save: (user: UserDTO) => Promise<void>;
-        get: () => Promise<UserDTO>;
-        delete: () => Promise<void>;
-    },
-    token: {
-        save: (token: string) => Promise<void>;
-        get: () => Promise<string>;
-        delete: () => Promise<void>;
-    }
-}
+import StorageType from "src/@types/storage";
+import { USER_STORAGE, AUTH_TOKEN_STORAGE } from "@storage/config";
 
 const storage: StorageType = {
     user: {
-          save: async (user) => {
+        save: async (user) => {
             try {
                 const storage: string = JSON.stringify(user);
                 await AsyncStorage.setItem(USER_STORAGE, storage);
@@ -47,7 +35,7 @@ const storage: StorageType = {
         }
     },
     token: {
-         save: async (token) => {
+        save: async (token) => {
             try {
                 await AsyncStorage.setItem(AUTH_TOKEN_STORAGE, token);
             }
@@ -57,8 +45,7 @@ const storage: StorageType = {
         },
         get: async () => {
             try {
-                const storage: string | null = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE);
-                const token: string = storage ? JSON.parse(storage) : {};
+                const token = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE) as string;
 
                 return token;
             }
@@ -73,7 +60,7 @@ const storage: StorageType = {
             catch (error) {
                 throw error;
             }
-        } 
+        }
     }
 }
 

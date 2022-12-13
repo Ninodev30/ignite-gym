@@ -1,11 +1,12 @@
 import UserDTO from "@dtos/UserDTO";
 import SignInDataProps from "./signInDataProps";
 
-type ContextMethodsTypeProps = {
+type ContextMethodsType = {
     signIn: (data: SignInDataProps) => Promise<void>;
     signOut: () => Promise<void>;
     loadUserData: () => Promise<void>;
-    storageUserAndToken: (user: UserDTO, token: string) => Promise<void>;
+    userAndTokenUpdate: (userData: UserDTO, token: string) => void;
+    storageUserAndTokenSave: (userData: UserDTO, token: string) => Promise<void>;
 }
 
-export default ContextMethodsTypeProps;
+export default ContextMethodsType;

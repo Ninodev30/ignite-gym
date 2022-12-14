@@ -8,12 +8,15 @@ import Home from '@screens/Home';
 import History from '@screens/History';
 import Profile from '@screens/Profile';
 import Exercise from '@screens/Exercise';
+import ExerciseDTO from '@dtos/ExerciseDTO';
 
 type AppRoutes = {
     home: undefined;
     history: undefined;
     profile: undefined;
-    exercise: undefined;
+    exercise: {
+        data: ExerciseDTO;
+    };
 }
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>;

@@ -14,7 +14,7 @@ import AppError from '@utils/AppError';
 
 const SignIn: React.FC = () => {
     const { show } = useToast();
-    const { user, methods: { signIn } } = useAuth();
+    const { methods: { signIn } } = useAuth();
     const { navigate }: AuthNavigatorRoutesProps = useNavigation();
 
     const { control, handleSubmit, formState: { errors } } = useForm<SignInDataProps>({

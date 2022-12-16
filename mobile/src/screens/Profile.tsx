@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
-import { VStack, ScrollView, Center, Skeleton, Text, Heading, useToast, IToastProps } from "native-base";
+import { Controller, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { VStack, ScrollView, Center, Skeleton, Text, Heading, useToast } from "native-base";
 import * as EIP from 'expo-image-picker';
 import * as EFS from 'expo-file-system';
+import useAuth from '@hooks/useAuth';
+import ProfileFormDataProps from 'src/@types/profileForm';
+import profileSchema from '@utils/profileSchema';
 import ScreenHeader from "@components/ScreenHeader";
 import UserPhoto from "@components/UserPhoto";
 import Input from '@components/Input';
@@ -12,13 +17,23 @@ const Profile: React.FC = () => {
     const [isPhotoLoading, setIsPhotoLoading] = useState<boolean>(false);
     const [userPhoto, setUserPhoto] = useState<string>('https://github.com/Ninodev30.png');
 
-    const show : (props: IToastProps) => any = useToast().show;
+    const { show } = useToast();
     const PHOTO_SIZE: number = 33;
 
-    const handleUserPhotoSelect: () => Promise<void> = async () => {
-        setIsPhotoLoading(true);
+    const { user } = useAuth();
 
+    const { control, handleSubmit, formState: { errors } } = useForm<ProfileFormDataProps>({
+        defaultValues: {
+            name: user.name,
+            email: user.email
+        },
+        resolver: yupResolver(profileSchema)
+    });
+
+    const handleUserPhotoSelect: () => Promise<void> = async () => {
         try {
+            setIsPhotoLoading(true);
+
             const photoSelected: EIP.ImagePickerResult = await EIP.launchImageLibraryAsync({
                 mediaTypes: EIP.MediaTypeOptions.Images,
                 quality: 1,
@@ -42,18 +57,25 @@ const Profile: React.FC = () => {
                 setUserPhoto(photoSelected.uri);
             }
         }
-
         catch (error) {
             show({
                 title: 'Não foi possível alterar sua foto',
                 placement: 'top',
                 bgColor: 'gray.400'
             });
+
             console.log(error);
         }
-
         finally {
             setIsPhotoLoading(false);
+        }
+    }
+
+    const handleSignUp: () => Promise<void> = async () => {
+        try {
+        }
+        catch (error) {
+
         }
     }
 
@@ -78,63 +100,85 @@ const Profile: React.FC = () => {
                                 size={PHOTO_SIZE}
                             />
                     }
-
                     <TouchableOpacity onPress={handleUserPhotoSelect}>
-                        <Text
-                            color='green.500'
-                            fontSize='md'
-                            fontFamily='heading'
-                            mt={2}
-                            mb={8}
-                        >
+                        <Text color='green.500' fontSize='md' fontFamily='heading' mt={2} mb={8}>
                             Alterar foto
                         </Text>
                     </TouchableOpacity>
-
-                    <Input
-                        bgColor='gray.600'
-                        placeholder='Nome'
+                    <Controller
+                        control={control}
+                        name='name'
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                bgColor='gray.600'
+                                onChangeText={onChange}
+                                value={value}
+                            />
+                        )}
                     />
-
-                    <Input
-                        bgColor='gray.600'
-                        placeholder='ninodm.dev@gmail.com'
-                        isDisabled
+                    <Controller
+                        control={control}
+                        name='email'
+                        render={({ field: { value } }) => (
+                            <Input
+                                bgColor='gray.600'
+                                isDisabled
+                                value={value}
+                            />
+                        )}
                     />
-
-                    <Heading
-                        color='gray.200'
-                        fontSize='md'
-                        fontFamily='heading'
-                        alignSelf='flex-start'
-                        mt={9}
-                        mb={4}
-                    >
+                    <Heading color='gray.200' fontSize='md' fontFamily='heading' alignSelf='flex-start' mt={9} mb={4}>
                         Alterar senha
                     </Heading>
-
-                    <Input
-                        bgColor='gray.600'
-                        placeholder='Senha antiga'
-                        secureTextEntry
+                    <Controller
+                        control={control}
+                        name='old_password'
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                bgColor='gray.600'
+                                placeholder='Senha antiga'
+                                secureTextEntry
+                                onChangeText={onChange}
+                                value={value}
+                            //errorMessage={errors.old_password?.message}
+                            />
+                        )}
                     />
-
-                    <Input
-                        bgColor='gray.600'
-                        placeholder='Nova senha'
-                        secureTextEntry
+                    <Controller
+                        control={control}
+                        name='new_password'
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                bgColor='gray.600'
+                                placeholder='Nova senha'
+                                secureTextEntry
+                                onChangeText={onChange}
+                                value={value}
+                            //errorMessage={errors.new_password?.message}
+                            />
+                        )}
                     />
-
-                    <Input
-                        bgColor='gray.600'
-                        placeholder='Confirme a nova senha'
-                        secureTextEntry
+                    <Controller
+                        control={control}
+                        name='confim_new_password'
+                        render={({ field: { value, onChange } }) => (
+                            <Input
+                                bgColor='gray.600'
+                                placeholder='Confirme a nova senha'
+                                secureTextEntry
+                                onChangeText={onChange}
+                                value={value}
+                                // errorMessage={errors.confim_new_password?.message}
+                                onSubmitEditing={handleSubmit(handleSignUp)}
+                                returnKeyType='send'
+                            />
+                        )}
                     />
-
                     <Button
                         title='Trocar senha'
                         variant='solid'
                         mt={6}
+                        onPress={handleSubmit(handleSignUp)}
                     />
                 </Center>
             </ScrollView>

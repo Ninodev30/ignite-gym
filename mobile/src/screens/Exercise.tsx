@@ -1,15 +1,16 @@
+import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Feather } from '@expo/vector-icons';
 import { Heading, HStack, Icon, Text, VStack, Image, Box, useToast } from "native-base";
+import { AppNavigatorRoutesProps } from "src/routes/app.routes";
+import api from "@services/api";
+import AppError from "@utils/AppError";
 import BodySvg from '@assets/body.svg';
 import SeriesSvg from '@assets/series.svg';
 import RepetitionsSvg from '@assets/repetitions.svg'
 import Button from "@components/Button";
 import ExerciseDTO from "@dtos/ExerciseDTO";
-import api from "@services/api";
-import AppError from "@utils/AppError";
-import { useState } from "react";
 
 type RouteParams = {
     data: ExerciseDTO;
@@ -19,7 +20,7 @@ const Exercise: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const { show } = useToast();
-    const { goBack } = useNavigation();
+    const { navigate, goBack } = useNavigation<AppNavigatorRoutesProps>();
 
     const { params } = useRoute();
     const { data: { name, group, demo, series, repetitions, id } } = params as RouteParams;
@@ -31,12 +32,13 @@ const Exercise: React.FC = () => {
             await api.post('/history', { exercise_id: id });
 
             const title: string = 'Parabéns! Exercício concluído com sucesso.'
-
             show({
                 title,
                 placement: 'top',
                 bgColor: 'green.700'
             });
+
+            navigate('history');
         }
         catch (error) {
             const isAppError = error instanceof AppError;

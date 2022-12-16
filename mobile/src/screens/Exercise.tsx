@@ -1,22 +1,57 @@
 import { TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Feather } from '@expo/vector-icons';
-import { Heading, HStack, Icon, Text, VStack, Image, Box } from "native-base";
+import { Heading, HStack, Icon, Text, VStack, Image, Box, useToast } from "native-base";
 import BodySvg from '@assets/body.svg';
 import SeriesSvg from '@assets/series.svg';
 import RepetitionsSvg from '@assets/repetitions.svg'
 import Button from "@components/Button";
 import ExerciseDTO from "@dtos/ExerciseDTO";
 import api from "@services/api";
+import AppError from "@utils/AppError";
+import { useState } from "react";
 
 type RouteParams = {
     data: ExerciseDTO;
 }
 
 const Exercise: React.FC = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const { show } = useToast();
     const { goBack } = useNavigation();
+
     const { params } = useRoute();
-    const { data: { name, group, demo, series, repetitions } } = params as RouteParams;
+    const { data: { name, group, demo, series, repetitions, id } } = params as RouteParams;
+
+    const handleExerciseHistoryRegister: () => Promise<void> = async () => {
+        try {
+            setIsLoading(true);
+
+            await api.post('/history', { exercise_id: id });
+
+            const title: string = 'Parabéns! Exercício concluído com sucesso.'
+
+            show({
+                title,
+                placement: 'top',
+                bgColor: 'green.700'
+            });
+        }
+        catch (error) {
+            const isAppError = error instanceof AppError;
+            const title: string = isAppError ? error.message : 'Não foi possível registrar o exercício';
+
+            show({
+                title,
+                placement: 'top',
+                bgColor: 'red.500'
+            });
+        }
+        finally {
+            setIsLoading(false);
+        }
+    }
 
     return (
         <VStack flex={1}>
@@ -68,6 +103,8 @@ const Exercise: React.FC = () => {
                     <Button
                         title='Marcar como realizado'
                         variant='solid'
+                        isLoading={isLoading}
+                        onPress={handleExerciseHistoryRegister}
                     />
                 </Box>
             </VStack>

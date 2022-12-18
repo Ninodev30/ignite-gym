@@ -71,8 +71,9 @@ const Profile: React.FC = () => {
         }
     }
 
-    const handleSignUp: () => Promise<void> = async () => {
+    const handleProfileUpdate: (data: ProfileFormDataProps) => Promise<void> = async (data) => {
         try {
+            console.log(data);
         }
         catch (error) {
 
@@ -113,6 +114,7 @@ const Profile: React.FC = () => {
                                 bgColor='gray.600'
                                 onChangeText={onChange}
                                 value={value}
+                                errorMessage={errors.name?.message}
                             />
                         )}
                     />
@@ -133,52 +135,48 @@ const Profile: React.FC = () => {
                     <Controller
                         control={control}
                         name='old_password'
-                        render={({ field: { value, onChange } }) => (
+                        render={({ field: { onChange } }) => (
                             <Input
                                 bgColor='gray.600'
                                 placeholder='Senha antiga'
                                 secureTextEntry
                                 onChangeText={onChange}
-                                value={value}
-                            //errorMessage={errors.old_password?.message}
                             />
                         )}
                     />
                     <Controller
                         control={control}
-                        name='new_password'
-                        render={({ field: { value, onChange } }) => (
+                        name='password'
+                        render={({ field: { onChange } }) => (
                             <Input
                                 bgColor='gray.600'
                                 placeholder='Nova senha'
                                 secureTextEntry
                                 onChangeText={onChange}
-                                value={value}
-                            //errorMessage={errors.new_password?.message}
+                                errorMessage={errors.password?.message}
                             />
                         )}
                     />
                     <Controller
                         control={control}
-                        name='confim_new_password'
-                        render={({ field: { value, onChange } }) => (
+                        name='confirm_password'
+                        render={({ field: { onChange } }) => (
                             <Input
                                 bgColor='gray.600'
                                 placeholder='Confirme a nova senha'
                                 secureTextEntry
                                 onChangeText={onChange}
-                                value={value}
-                                // errorMessage={errors.confim_new_password?.message}
-                                onSubmitEditing={handleSubmit(handleSignUp)}
+                                errorMessage={errors.confirm_password?.message}
+                                onSubmitEditing={handleSubmit(handleProfileUpdate)}
                                 returnKeyType='send'
                             />
                         )}
                     />
                     <Button
-                        title='Trocar senha'
+                        title='Atualizar'
                         variant='solid'
                         mt={6}
-                        onPress={handleSubmit(handleSignUp)}
+                        onPress={handleSubmit(handleProfileUpdate)}
                     />
                 </Center>
             </ScrollView>

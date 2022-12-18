@@ -1,9 +1,9 @@
-type ProfileDataProps = {
+type ProfileFormDataProps = {
     name: string,
     email: string,
     old_password: string,
-    new_password: string,
-    confim_new_password: string,
+    password: string,
+    confirm_password: string,
 }
 
-export default ProfileDataProps;
+export default ProfileFormDataProps;

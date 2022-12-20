@@ -84,6 +84,15 @@ const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) =
             catch (error) {
                 throw error;
             }
+        },
+        updateUserProfile: async (userUpdated) => {
+            try {
+                setUser(userUpdated);
+                await storage.user.save(userUpdated);
+            }
+            catch (error) {
+                throw error;
+            }
         }
     }
 

@@ -12,15 +12,24 @@ import ScreenHeader from "@components/ScreenHeader";
 import UserPhoto from "@components/UserPhoto";
 import Input from '@components/Input';
 import Button from '@components/Button';
+import api from '@services/api';
+import AppError from '@utils/AppError';
+import UserDTO from '@dtos/UserDTO';
+
+type UpdateTypeProps = {
+    photo: () => Promise<void>;
+    data: (data: ProfileFormDataProps) => Promise<void>;
+}
 
 const Profile: React.FC = () => {
+    const [isUpdating, setIsUpdating] = useState<boolean>(false);
     const [isPhotoLoading, setIsPhotoLoading] = useState<boolean>(false);
     const [userPhoto, setUserPhoto] = useState<string>('https://github.com/Ninodev30.png');
 
     const { show } = useToast();
-    const PHOTO_SIZE: number = 33;
+    const { user, methods: { updateUserProfile } } = useAuth();
 
-    const { user } = useAuth();
+    const PHOTO_SIZE: number = 33;
 
     const { control, handleSubmit, formState: { errors } } = useForm<ProfileFormDataProps>({
         defaultValues: {
@@ -30,53 +39,81 @@ const Profile: React.FC = () => {
         resolver: yupResolver(profileSchema)
     });
 
-    const handleUserPhotoSelect: () => Promise<void> = async () => {
-        try {
-            setIsPhotoLoading(true);
+    const handleUpdate: UpdateTypeProps = {
+        photo: async () => {
+            try {
+                setIsPhotoLoading(true);
 
-            const photoSelected: EIP.ImagePickerResult = await EIP.launchImageLibraryAsync({
-                mediaTypes: EIP.MediaTypeOptions.Images,
-                quality: 1,
-                aspect: [4, 4],    // Image 4 for 4
-                allowsEditing: true
-            });
+                const photoSelected: EIP.ImagePickerResult = await EIP.launchImageLibraryAsync({
+                    mediaTypes: EIP.MediaTypeOptions.Images,
+                    quality: 1,
+                    aspect: [4, 4],    // Image 4 for 4
+                    allowsEditing: true
+                });
 
-            if (photoSelected.cancelled)
-                return;
+                if (photoSelected.cancelled)
+                    return;
 
-            if (photoSelected.uri) {
-                const photoInfo: EFS.FileInfo = await EFS.getInfoAsync(photoSelected.uri);
+                if (photoSelected.uri) {
+                    const photoInfo: EFS.FileInfo = await EFS.getInfoAsync(photoSelected.uri);
 
-                if (photoInfo.size && (photoInfo.size / 1024 / 1024) > 5)
-                    return show({
-                        title: 'Escolha uma imagem de até 5MB',
-                        placement: 'top',
-                        bgColor: 'red.700'
-                    });
+                    if (photoInfo.size && (photoInfo.size / 1024 / 1024) > 5)
+                        return show({
+                            title: 'Escolha uma imagem de até 5MB',
+                            placement: 'top',
+                            bgColor: 'red.700'
+                        });
 
-                setUserPhoto(photoSelected.uri);
+                    setUserPhoto(photoSelected.uri);
+                }
             }
-        }
-        catch (error) {
-            show({
-                title: 'Não foi possível alterar sua foto',
-                placement: 'top',
-                bgColor: 'gray.400'
-            });
+            catch (error) {
+                show({
+                    title: 'Não foi possível alterar sua foto',
+                    placement: 'top',
+                    bgColor: 'gray.400'
+                });
 
-            console.log(error);
-        }
-        finally {
-            setIsPhotoLoading(false);
-        }
-    }
+                console.log(error);
+            }
+            finally {
+                setIsPhotoLoading(false);
+            }
+        },
+        data: async ({ name, password, old_password }) => {
+            try {
+                setIsUpdating(true);
 
-    const handleProfileUpdate: (data: ProfileFormDataProps) => Promise<void> = async (data) => {
-        try {
-            console.log(data);
-        }
-        catch (error) {
+                const userUpdated: UserDTO = user;
+                userUpdated.name = name;
 
+                await api.put('/users', {
+                    name,
+                    password,
+                    old_password
+                })
+
+                await updateUserProfile(userUpdated);
+
+                show({
+                    title: 'Perfil atualizado com sucesso',
+                    placement: 'top',
+                    bgColor: 'green.500'
+                });
+            }
+            catch (error) {
+                const isAppError = error instanceof AppError;
+                const title: string = isAppError ? error.message : 'Não foi possível atualizar os dados. Tente novamente mais tarde.'
+
+                show({
+                    title,
+                    placement: 'top',
+                    bgColor: 'red.500'
+                });
+            }
+            finally {
+                setIsUpdating(false);
+            }
         }
     }
 
@@ -101,7 +138,7 @@ const Profile: React.FC = () => {
                                 size={PHOTO_SIZE}
                             />
                     }
-                    <TouchableOpacity onPress={handleUserPhotoSelect}>
+                    <TouchableOpacity onPress={handleUpdate.photo}>
                         <Text color='green.500' fontSize='md' fontFamily='heading' mt={2} mb={8}>
                             Alterar foto
                         </Text>
@@ -167,7 +204,7 @@ const Profile: React.FC = () => {
                                 secureTextEntry
                                 onChangeText={onChange}
                                 errorMessage={errors.confirm_password?.message}
-                                onSubmitEditing={handleSubmit(handleProfileUpdate)}
+                                onSubmitEditing={handleSubmit(handleUpdate.data)}
                                 returnKeyType='send'
                             />
                         )}
@@ -176,7 +213,8 @@ const Profile: React.FC = () => {
                         title='Atualizar'
                         variant='solid'
                         mt={6}
-                        onPress={handleSubmit(handleProfileUpdate)}
+                        onPress={handleSubmit(handleUpdate.data)}
+                        isLoading={isUpdating}
                     />
                 </Center>
             </ScrollView>

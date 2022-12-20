@@ -7,6 +7,7 @@ type ContextMethodsType = {
     loadUserData: () => Promise<void>;
     userAndTokenUpdate: (userData: UserDTO, token: string) => void;
     storageUserAndTokenSave: (userData: UserDTO, token: string) => Promise<void>;
+    updateUserProfile: (userUpdated: UserDTO) => Promise<void>;
 }
 
 export default ContextMethodsType;

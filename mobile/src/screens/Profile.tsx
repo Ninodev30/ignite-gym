@@ -8,13 +8,13 @@ import * as EFS from 'expo-file-system';
 import useAuth from '@hooks/useAuth';
 import ProfileFormDataProps from 'src/@types/profileForm';
 import profileSchema from '@utils/profileSchema';
+import AppError from '@utils/AppError';
+import UserDTO from '@dtos/UserDTO';
+import api from '@services/api';
 import ScreenHeader from "@components/ScreenHeader";
 import UserPhoto from "@components/UserPhoto";
 import Input from '@components/Input';
 import Button from '@components/Button';
-import api from '@services/api';
-import AppError from '@utils/AppError';
-import UserDTO from '@dtos/UserDTO';
 
 type UpdateTypeProps = {
     photo: () => Promise<void>;
@@ -24,11 +24,11 @@ type UpdateTypeProps = {
 const Profile: React.FC = () => {
     const [isUpdating, setIsUpdating] = useState<boolean>(false);
     const [isPhotoLoading, setIsPhotoLoading] = useState<boolean>(false);
-    const [userPhoto, setUserPhoto] = useState<string>('https://github.com/Ninodev30.png');
 
     const { show } = useToast();
     const { user, methods: { updateUserProfile } } = useAuth();
 
+    const userPhoto: string = `${api.defaults.baseURL}/avatar/${user.avatar}`;
     const PHOTO_SIZE: number = 33;
 
     const { control, handleSubmit, formState: { errors } } = useForm<ProfileFormDataProps>({
@@ -64,7 +64,15 @@ const Profile: React.FC = () => {
                             bgColor: 'red.700'
                         });
 
-                    setUserPhoto(photoSelected.uri);
+                    const fileExtension = photoSelected.uri.split('.').pop();
+
+                    const photoFile: any = {
+                        name: `${user.name}.${fileExtension}`.toLowerCase(),
+                        uri: photoSelected.uri,
+                        type: `${photoSelected.type}/${fileExtension}`
+                    };
+
+                    updateAvatar(photoFile);
                 }
             }
             catch (error) {
@@ -114,6 +122,33 @@ const Profile: React.FC = () => {
             finally {
                 setIsUpdating(false);
             }
+        }
+    }
+
+    const updateAvatar: (photoFile: any) => Promise<void> = async (photoFile) => {
+        try {
+            const userPhotoUploadForm = new FormData();
+            userPhotoUploadForm.append('avatar', photoFile)
+
+            const { data: { avatar } } = await api.patch('users/avatar', userPhotoUploadForm, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            const userUpdated: UserDTO = user;
+            userUpdated.avatar = avatar;
+
+            updateUserProfile(userUpdated);
+
+            show({
+                title: 'Foto atualizada',
+                placement: 'top',
+                bgColor: 'green.500'
+            })
+        }
+        catch (error) {
+            throw error;
         }
     }
 

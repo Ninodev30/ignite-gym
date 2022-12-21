@@ -3,15 +3,17 @@ import { Heading, HStack, Icon, Text, VStack } from "native-base"
 import { MaterialIcons } from '@expo/vector-icons';
 import defaultUserPhoto from '@assets/userPhotoDefault.png';
 import useAuth from '@hooks/useAuth';
+import api from '@services/api';
 import UserPhoto from "./UserPhoto";
 
 const HomeHeader: React.FC = () => {
     const { user, methods: { signOut } } = useAuth();
+    const userPhoto: string = `${api.defaults.baseURL}/avatar/${user.avatar}`;
 
     return (
         <HStack bgColor='gray.600' pt={16} pb={5} px={8} alignItems='center'>
             <UserPhoto
-                source={user.avatar ? { uri: 'https://github.com/ninodev30.png' } : defaultUserPhoto}
+                source={user.avatar ? { uri: userPhoto } : defaultUserPhoto}
                 alt='user photo'
                 size={16}
                 mr={4}

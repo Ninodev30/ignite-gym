@@ -100,6 +100,14 @@ const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) =
         methods.loadUserData();
     }, []);
 
+    useEffect(() => {
+        const subscribe = api.registerInterceptTokenManager(methods.signOut)
+
+        return () => {
+            subscribe();
+        }
+    }, [methods.signOut])
+
     return (
         <AuthContext.Provider value={{
             user: user,

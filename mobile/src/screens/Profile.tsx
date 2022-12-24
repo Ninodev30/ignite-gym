@@ -11,6 +11,7 @@ import profileSchema from '@utils/profileSchema';
 import AppError from '@utils/AppError';
 import UserDTO from '@dtos/UserDTO';
 import api from '@services/api';
+import defaultUserPhoto from '@assets/userPhotoDefault.png';
 import ScreenHeader from "@components/ScreenHeader";
 import UserPhoto from "@components/UserPhoto";
 import Input from '@components/Input';
@@ -168,7 +169,7 @@ const Profile: React.FC = () => {
                             />
                             :
                             <UserPhoto
-                                source={{ uri: userPhoto }}
+                                source={user.avatar ? { uri: userPhoto } : defaultUserPhoto}
                                 alt='User Photo'
                                 size={PHOTO_SIZE}
                             />

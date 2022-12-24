@@ -2,16 +2,24 @@ import axios, { AxiosInstance } from 'axios';
 import AppError from '@utils/AppError';
 import storage from '@storage/index';
 
-type SignOut = () => void;
-
 type PromiseType = {
     resolve: (value: undefined) => void;
     reject: (reason: undefined) => void;
 }
 
-type APIIstanceProps = AxiosInstance & {
-    registerInterceptTokenManager: (signOut: SignOut) => () => void;
+type RegisterInterceptTokenManagerProps = {
+    signOut: () => void;
+    resfreshTokenUpdated: (newToken: string) => void;
 }
+
+type APIIstanceProps = AxiosInstance & {
+    registerInterceptTokenManager: ({ }: RegisterInterceptTokenManagerProps) => () => void;
+}
+
+type ProcessQueueParams = ({
+    error: Error | null;
+    token: string | null;
+});
 
 const api = axios.create({
     baseURL: 'http://10.1.1.109:3333'
@@ -20,7 +28,18 @@ const api = axios.create({
 let isRefreshing: boolean = false;
 let failedQueue: PromiseType[] = [];
 
-api.registerInterceptTokenManager = signOut => {
+const processQueue = ({ error, token }: ProcessQueueParams): void => {
+    failedQueue.forEach((request: any) => {
+        if (error)
+            request.reject(error);
+        else
+            request.resolve(token)
+    });
+
+    failedQueue = [];
+};
+
+api.registerInterceptTokenManager = ({ signOut, resfreshTokenUpdated }) => {
     const interceptTokenManager = api.interceptors.response.use(response => response, async requestError => {
         try {
             if (requestError?.response?.status === 401) {
@@ -39,7 +58,7 @@ api.registerInterceptTokenManager = signOut => {
                             failedQueue.push({ resolve, reject })
                         })
                             .then((token) => {
-                                originalRequest.headers.Authorization = `Bearer ${token}`
+                                originalRequest.headers['Authorization'] = `Bearer ${token}`
                                 return axios(originalRequest);
                             })
                             .catch((error) => {
@@ -47,6 +66,28 @@ api.registerInterceptTokenManager = signOut => {
                             })
 
                     isRefreshing = true;
+
+                    return new Promise(async (resolve, reject) => {
+                        try {
+                            const { data } = await api.post('/sessions/refresh-token', { token: token });
+                            await storage.token.save(data.token);
+
+                            api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+                            originalRequest.headers['Authorization'] = `Bearer ${data.token}`;
+
+                            resfreshTokenUpdated(data.token)
+                            processQueue({ error: null, token: data.token });
+                            resolve(originalRequest);
+                        }
+                        catch (error: any) {
+                            processQueue({ error, token: null });
+                            signOut();
+                            reject(error);
+                        }
+                        finally {
+                            isRefreshing = false;
+                        }
+                    })
                 }
 
                 signOut();
@@ -67,15 +108,5 @@ api.registerInterceptTokenManager = signOut => {
         api.interceptors.response.eject(interceptTokenManager)
     }
 }
-
-// api.interceptors.request.use(
-//     (config) => {
-//         console.log('AXIOS', config);
-//         return config;
-//     },
-//     (error) => {
-//         return Promise.reject(error);
-//     }
-// );
 
 export default api;

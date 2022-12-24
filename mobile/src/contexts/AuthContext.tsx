@@ -6,6 +6,7 @@ import storage from "@storage/index";
 
 export type AuthContextDataProps = {
     user: UserDTO;
+    refreshedToken: string;
     methods: ContextMethodsType;
     isLoadingUserStorageData: boolean;
 }
@@ -18,6 +19,7 @@ export const AuthContext = createContext<AuthContextDataProps>({} as AuthContext
 
 const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) => {
     const [user, setUser] = useState<UserDTO>({} as UserDTO);
+    const [refreshedToken, setRefreshedToken] = useState<string>('');
     const [isLoadingUserStorageData, setIsLoadingUserStorageData] = useState<boolean>(true);
 
     const methods: ContextMethodsType = {
@@ -93,6 +95,9 @@ const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) =
             catch (error) {
                 throw error;
             }
+        },
+        refreshTokenUpdate: (newToken) => {
+            setRefreshedToken(newToken);
         }
     }
 
@@ -101,7 +106,10 @@ const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) =
     }, []);
 
     useEffect(() => {
-        const subscribe = api.registerInterceptTokenManager(methods.signOut)
+        const subscribe = api.registerInterceptTokenManager({
+            signOut: methods.signOut,
+            resfreshTokenUpdated: methods.refreshTokenUpdate
+        })
 
         return () => {
             subscribe();
@@ -110,8 +118,9 @@ const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) =
 
     return (
         <AuthContext.Provider value={{
-            user: user,
-            methods: methods,
+            user,
+            methods,
+            refreshedToken,
             isLoadingUserStorageData
         }}>
             {children}
